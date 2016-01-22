@@ -6,73 +6,89 @@ rm -f AllResults.json
 # load settings
 source GetAllData.cfg
 
-#build query
 CMD="curl -s -u${Username}:${Password} -oTempResults.json \"${Endpoint}\" -d '{${Query}}'"
-#echo " "
-#echo $CMD
-#echo " "
+# echo $CMD
 eval $CMD
 
 declare -i RequestCount
 RequestCount=1
-FirstDate=$(jq -r '.results[0].postedTime'  TempResults.json)
-echo -ne "\r Requests: ${RequestCount} - $FirstDate " 
+RED='\033[0;31m'
 
-declare -x NextToken=""
+ErrorMsg=$(jq -c '.error.message'  TempResults.json)
 
-echo "{ \"results\":[" > AllResults.json
-NextToken=$(jq -r  '.next'  TempResults.json)
-jq -c  '.results[]'  TempResults.json | sed 's/$/,/' >> AllResults.json
 
-# echo "Next Token = ${NextToken}"
+if [ ! "$ErrorMsg" = "null" ]
+then
+	printf "${RED} 	Error: $ErrorMsg NC='\033[0m'"
+	echo ""
+else
+	FirstDate=$(jq -r '.results[0].postedTime'  TempResults.json)
+	echo -ne "\r Requests: ${RequestCount} - $FirstDate " 
 
-while [ ! "$NextToken" = "null" ]
-do
-	OldNextToken=$NextToken
-	echo "," >> AllResults.json
-	PostCommand="${Query},\"next\":\"${NextToken}\""
-	CMD="curl -s -u${Username}:${Password} -oTempResults.json \"${Endpoint}\" -d '{${PostCommand}}'" 
-	#echo " "
-	#echo $CMD
-	#echo " "
-	eval $CMD
+	declare -x NextToken=""
 
-	RequestCount=$[RequestCount + 1]		
-	ErrorMsg=$(jq -c '.error.message'  TempResults.json)
+	echo "{ \"results\":[" > AllResults.json
+	NextToken=$(jq -r  '.next'  TempResults.json)
+	jq -c  '.results[]'  TempResults.json | sed 's/$/,/' >> AllResults.json
+
+	# echo "Next Token = ${NextToken}"
+
+	while [ ! "$NextToken" = "null" ]
+	do
+		OldNextToken=$NextToken
+		echo "," >> AllResults.json
+		PostCommand="${Query},\"next\":\"${NextToken}\""
+		# StagingCMD="curl -s -u${Username}:${Password} -oTempResults.json -H 'Dtab-Local: /s/datadelivery-search/tweethunter => /srv#/staging1/atla/datadelivery-search-stg1/tweethunter' \"${Endpoint}\" -d '{${PostCommand}}'" 
 		
-	if [ -z "$ErrorMsg" ] 
-	then
-		echo "Error: $ErrorMsg"
-	else
-		jq -c  '.results[]'  TempResults.json | sed 's/$/,/' >> AllResults.json
-		NextToken=$(jq -r  '.next'  TempResults.json)
-		FirstDate=$(jq -r '.results[0].postedTime'  TempResults.json)
-		
-		if [ "${FirstDate}" = "null" ]
-		then
-			echo -ne "\r Requests: ${RequestCount} - No records returned.     "
-		else
-			echo -ne "\r Requests: ${RequestCount} - $FirstDate " 
-		fi
+		CMD="curl -s -u${Username}:${Password} -oTempResults.json \"${Endpoint}\" -d '{${PostCommand}}'" 
+		# echo " "
+		# echo $PostCommand
+		# echo " "
+		eval $CMD
 
-		if [ "${NextToken}" = "null" ]	
+		RequestCount=$[RequestCount + 1]		
+		ErrorMsg=$(jq -c '.error.message'  TempResults.json)
+		
+		if [ -z "$ErrorMsg" ] 
 		then
-			echo -ne "\r Finished processing.  Data in GetAllData.json      "
-			echo " " 
-			echo "Total Requests: ${RequestCount}"
-			break
+			echo "Error: $ErrorMsg"
 		else
-			if [ "$NextToken" = "Old$NextToken" ]
+			jq -c  '.results[]'  TempResults.json | sed 's/$/,/' >> AllResults.json
+			NextToken=$(jq -r  '.next'  TempResults.json)
+			# echo " "
+			# echo "Next Token: $NextToken"
+			FirstDate=$(jq -r '.results[0].postedTime'  TempResults.json)
+		
+			FirstDateCounts=$(jq -r '.results[0].timePeriod'  TempResults.json)
+		
+			if [ "${FirstDate}" = "null" ]
 			then
-				echo "Duplicate Token Detected"
-				break
+			   if [ "${FirstDateCounts}" = "null" ]
+			   then
+			      echo -ne "\r Requests: ${RequestCount} - No records returned.     "
+			   else
+			      echo -ne "\r Requests: ${RequestCount} - $FirstDateCounts " 
+			   fi
+			else
+				echo -ne "\r Requests: ${RequestCount} - $FirstDate " 
 			fi
+
+			if [ ! "${NextToken}" = "null" ]	
+			then
+				if [ "$NextToken" = "Old$NextToken" ]
+				then
+					echo "Duplicate Token Detected"
+					break
+				fi
+			fi	
 		fi	
-	fi
-	
-done
-sed '$ s/.$//' AllResults.json > TempResults.json
-echo "]}" >> TempResults.json
-sed  's/,//' TempResults.json | sed '/^\s*$/d' > GetAllData.json
-TotalRecords=$(jq '.[] | length' GetAllData.json)
-echo "Total Activities: ${TotalRecords}"
+	done
+	echo -ne "\rFinished processing.  "
+	echo "Data in GetAllData.json      "
+	echo "Total Requests: ${RequestCount}"
+	sed '$ s/.$//' AllResults.json > AllTempResults.json
+	echo "]}" >> AllTempResults.json
+	sed  's/,//' AllTempResults.json | sed '/^\s*$/d' > GetAllData.json
+	TotalRecords=$(jq '.[] | length' GetAllData.json)
+	echo "Total Activities: ${TotalRecords}"
+fi
