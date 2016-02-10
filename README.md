@@ -29,5 +29,7 @@ Decompresses and combines multiple downloaded Historical PowerTrack .gz files in
 * RejectHPTJob.sh
  
 All of the above are simple bash scripts to help manage HPT jobs.
-I've not found it feasible or necessary to write a pure bash script to download the individual HPT jobs.  For that there are either tools [here](http://support.gnip.com/code/historical_powertrack.html) and in my Python repository [here](https://github.com/GnipDz/Python) or PowerShell repository [here](https://github.com/GnipDz/Powershell)
+Make sure to edit the files to replace accountname and user info, then chmod +x each script to make it executable.
+
+I've not found it feasible or necessary to write a pure bash script to download the individual HPT jobs.  For that there are either tools [here](http://support.gnip.com/code/historical_powertrack.html), as well as in my Python repository [here](https://github.com/GnipDz/Python) and PowerShell repository [here](https://github.com/GnipDz/Powershell)
 
