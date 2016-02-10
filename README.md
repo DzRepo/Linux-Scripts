@@ -19,4 +19,15 @@ Decompresses and combines multiple downloaded Historical PowerTrack .gz files in
   * Creates a file named 'filtered.json'
   * Accepts a command line parameter of a filter describing colection of files to decompress/combine
      * Example:  ./HPTCleaner Activities-Test*.gz
-  
+
+## Historical PowerTrack mangagement scripts:
+
+* CreateHPTJob.sh
+* GetHPTJobs.sh
+* GetHPTJobStatus.sh
+* AcceptHPTJob.sh
+* RejectHPTJob.sh
+ 
+All of the above are simple bash scripts to help manage HPT jobs.
+I've not found it feasible or necessary to write a pure bash script to download the individual HPT jobs.  For that there are either tools [here](http://support.gnip.com/code/historical_powertrack.html) and in my Python repository [here](https://github.com/GnipDz/Python) or PowerShell repository [here](https://github.com/GnipDz/Powershell)
+
