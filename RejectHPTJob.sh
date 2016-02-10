@@ -1,0 +1,2 @@
+echo "Rejecting Job " $1
+curl -v -X PUT -uUSERNAME -H "Content-Type: application/json"  -d '{"status":"reject"}' "https://historical.gnip.com:443/accounts/ACCOUNTNAME/publishers/twitter/historical/track/jobs/$1.json" | jq ".statusMessage"  
