@@ -20,7 +20,7 @@ Decompresses and combines multiple downloaded Historical PowerTrack .gz files in
   * Accepts a command line parameter of a filter describing colection of files to decompress/combine
      * Example:  ./HPTCleaner Activities-Test*.gz
 
-## Historical PowerTrack mangagement scripts:
+## Historical PowerTrack mangagement scripts
 
 * CreateHPTJob.sh
 * GetHPTJobs.sh
