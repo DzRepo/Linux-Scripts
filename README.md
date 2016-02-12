@@ -8,7 +8,14 @@ Used to execute a query against Gnip's [Full Archive Search](http://support.gnip
   * Consolidates all results into a single file as a single (potentially large) JSON object.
   * Can be used to retreive either counts or data
   * Requires [curl](https://curl.haxx.se), [sed](http://www.grymoire.com/Unix/Sed.html), and [jq](https://stedolan.github.io/jq/)
-*  All parameters currently are set in [FullArchiveSearch.cfg](FullArchiveSearch.cfg)  - no command line parameters.
+*  All parameters can be set in [FullArchiveSearch.cfg](FullArchiveSearch.cfg)  - no command line parameters needed.
+* Command line parameters overide .cfg file settings in this order:
+	* Search
+	* Destination Filename
+	* fromDate
+	* toDate
+	* Search Type ("Data" or "Counts")
+	* Example: ./FullArchiveSearch.sh "\\$TWTR" twitter\_cashtag\_counts.json "201409280000" "201602100000" "Counts"
 
 ##HPTCleaner
 Decompresses and combines multiple downloaded Historical PowerTrack .gz files into a single non-compressed file.

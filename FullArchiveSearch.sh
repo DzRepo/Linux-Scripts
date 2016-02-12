@@ -1,3 +1,4 @@
+
 # FullArchiveSearch.sh
 # Get all the data or counts for a  full archive search, iterating through next tokens
 # Consolidates all results into a single file.
@@ -14,6 +15,52 @@ rm -f AllResults.json
 
 # load settings
 source FullArchiveSearch.cfg
+
+#Override paramenters with "Search" and "Destination"
+
+if [ ! -z "$1" ] 
+then
+	searchQuery="$1"
+fi
+
+if [ ! -z "$2" ] 
+then
+	Destination="$2"
+fi
+
+if [ ! -z "$3" ] 
+then
+	fromDate="$3"
+fi
+
+if [ ! -z "$4" ] 
+then
+	toDate="$4"
+fi
+
+if [ ! -z "$5" ] 
+then
+	QueryType="$5"
+fi
+
+
+if [ "$QueryType" == "Data" ]
+then
+	echo "Query type is Data"
+else
+	echo "Query type is Counts"
+fi
+
+echo "Searching for: $searchQuery" 
+echo "Writing results to: $Destination"
+if [ ! -z "$fromDate" ]
+then
+	echo "From Date: $fromDate"
+fi
+if [ ! -z "$toDate" ]
+then
+	echo "  To Date: $toDate"
+fi
 
 #build query
 if [ ! -z "$fromDate" ]
@@ -125,7 +172,7 @@ else
 			if [ "${NextToken}" = "null" ]	
 			then
 				echo " " 
-				echo -ne "\r Finished processing.  Data in $Destination      "
+				echo -ne "\r Finished processing                          "
 				echo " " 
 				echo "Total Requests: ${RequestCount}"
 				break
