@@ -22,6 +22,7 @@ if [ ! -z "$1" ]
 then
 	searchQuery="$1"
 fi
+echo "  Searching for: $searchQuery"
 
 if [ ! -z "$2" ] 
 then
@@ -89,8 +90,10 @@ else
 	SQuery="$SQuery\"query\":\"$searchQuery\""  
 	CMD="curl -s -u${Username}:${Password} -oTempResults.json ${Endpoint}/${Account}/${Label}/counts.json -d '{${SQuery}}'"
 fi
-
+echo " "
+# echo $CMD
 eval $CMD
+
 
 declare -i RequestCount
 RequestCount=1
@@ -128,7 +131,8 @@ else
 		else
 			CMD="curl -s -u${Username}:${Password} -oTempResults.json ${Endpoint}/${Account}/${Label}/counts.json -d '{${PostCommand}}'"
 		fi
-		
+		echo " "
+#		echo $CMD
 		eval $CMD
 
 		RequestCount=$[RequestCount + 1]		
@@ -138,7 +142,12 @@ else
 		then
 			echo ""
 			echo -e "$RED Error: $ErrorMsg $NC"
-			break
+			
+			if [[ ! $ErrorMsg == *"retry"* ]]
+			then
+			    break;
+			fi
+			
 		else
 			jq -c  '.results[]'  TempResults.json | sed 's/$/,/' >> AllResults.json
 			NextToken=$(jq -r  '.next'  TempResults.json)
@@ -203,6 +212,8 @@ else
 			mv AllTempResults.json $Destination
 			TotalRecords=$(jq '.[] | length' $Destination)	
 			echo "Total # of buckets: ${TotalRecords}"
+			TotalCount=$(jq "[.results[].count] | add" $Destination)
+			echo "Total of Counts: ${TotalCount}"
 		fi
 	fi
 fi
